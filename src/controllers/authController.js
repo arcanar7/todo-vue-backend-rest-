@@ -34,53 +34,65 @@ exports.auth_login = async (req, res) => {
     if (!candidate) {
       return res.status(400).json({ message })
     }
+
     const isMatch = await bcrypt.compare(password, candidate.password)
     if (!isMatch) {
       return res.status(400).json({ message })
     }
-    const token = jwt.sign({ userId: candidate._id }, config.JWT_SECRET, {
-      expiresIn: '30m',
-    })
-    const refreshToken = jwt.sign(
-      { userId: candidate._id },
-      config.REFRESH_SECRET,
-      {
-        expiresIn: '60d',
-      }
+
+    const { newAccessToken, newRefreshToken, expDate } = getNewTokens(
+      candidate._id
     )
 
-    jwt.verify(refreshToken, config.REFRESH_SECRET, (err, data) => {
-      console.log(data.exp)
-    })
+    candidate.refreshToken = newRefreshToken
+    await candidate.save()
 
-    return res.status(200).json({ token, refreshToken, uid: candidate._id })
+    return res
+      .status(200)
+      .json({ newAccessToken, newRefreshToken, expDate, uid: candidate._id })
   } catch (e) {
     console.log(e)
     return res.status(500).json({ message: 'Server error' })
   }
 }
 
-exports.auth_token = (req, res) => {
+exports.auth_token = async (req, res) => {
   const { refreshToken } = req.body
-  let decoded
   try {
-    decoded = jwt.verify(refreshToken, config.REFRESH_SECRET)
+    const decoded = jwt.verify(refreshToken, config.REFRESH_SECRET)
+    const candidate = await User.findOne(decoded.userId)
+
+    if (candidate.refreshToken !== refreshToken) {
+      return res.status(400).json({ message: 'Invalid token!' })
+    }
+
+    const { newAccessToken, newRefreshToken, expDate } = getNewTokens(
+      candidate._id
+    )
+
+    candidate.refreshToken = newRefreshToken
+    await candidate.save()
+
+    return res.status(200).json({ newAccessToken, newRefreshToken, expDate })
   } catch (e) {
     if (e instanceof jwt.TokenExpiredError) {
       return res.status(400).json({ message: 'Token expired!' })
     } else if (e instanceof jwt.JsonWebTokenError) {
       return res.status(400).json({ message: 'Invalid token!' })
+    } else {
+      console.log(e)
+      return res.status(500).json({ message: 'Server error' })
     }
   }
-  const newToken = jwt.sign({ userId: decoded.userId }, config.JWT_SECRET, {
+}
+
+function getNewTokens(userId) {
+  const newAccessToken = jwt.sign({ userId }, config.JWT_SECRET, {
     expiresIn: '30m',
   })
-  const newRefreshToken = jwt.sign(
-    { userId: decoded.userId },
-    config.REFRESH_SECRET,
-    {
-      expiresIn: '60d',
-    }
-  )
-  return res.status(200).json({ newToken, newRefreshToken })
+  const newRefreshToken = jwt.sign({ userId }, config.REFRESH_SECRET, {
+    expiresIn: '60d',
+  })
+  const expDate = jwt.verify(newAccessToken, config.JWT_SECRET).exp
+  return { newAccessToken, newRefreshToken, expDate }
 }
