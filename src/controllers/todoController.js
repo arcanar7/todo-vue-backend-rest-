@@ -48,3 +48,13 @@ exports.todo_delete = async (req, res) => {
     return res.status(500).json({ message: 'Server error' })
   }
 }
+
+exports.todo_deleteComleted = async (req, res) => {
+  try {
+    await Todo.deleteMany({ completed: true, userId: req.body.id })
+    return res.status(200).json({})
+  } catch (e) {
+    console.log(e)
+    return res.status(500).json({ message: 'Server error' })
+  }
+}

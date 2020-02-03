@@ -8,5 +8,6 @@ router.post('/', auth, todo_controller.todo_create)
 router.get('/', auth, todo_controller.todo_get)
 router.put('/:id', auth, todo_controller.todo_update)
 router.delete('/:id', auth, todo_controller.todo_delete)
+router.delete('/', auth, todo_controller.todo_deleteComleted)
 
 module.exports = router
