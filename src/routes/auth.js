@@ -4,6 +4,6 @@ const router = Router()
 
 router.post('/register', auth_controller.auth_register)
 router.post('/login', auth_controller.auth_login)
-router.post('/token', auth_controller.auth_login)
+router.post('/token', auth_controller.auth_token)
 
 module.exports = router

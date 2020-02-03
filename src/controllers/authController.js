@@ -60,10 +60,13 @@ exports.auth_token = async (req, res) => {
   const { refreshToken } = req.body
   try {
     const decoded = jwt.verify(refreshToken, config.REFRESH_SECRET)
-    const candidate = await User.findOne(decoded.userId)
+    const candidate = await User.findOne({ _id: decoded.userId })
+
+    console.log(candidate)
+    console.log(refreshToken)
 
     if (candidate.refreshToken !== refreshToken) {
-      return res.status(400).json({ message: 'Invalid token!' })
+      return res.status(400).json({ message: 'Invalid token! !==' })
     }
 
     const { newAccessToken, newRefreshToken, expDate } = getNewTokens(
@@ -88,7 +91,7 @@ exports.auth_token = async (req, res) => {
 
 function getNewTokens(userId) {
   const newAccessToken = jwt.sign({ userId }, config.JWT_SECRET, {
-    expiresIn: '30m',
+    expiresIn: '10s',
   })
   const newRefreshToken = jwt.sign({ userId }, config.REFRESH_SECRET, {
     expiresIn: '60d',
