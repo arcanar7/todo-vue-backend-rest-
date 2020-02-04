@@ -10,7 +10,7 @@ exports.todo_create = async (req, res) => {
     return res.status(201).json(todo)
   } catch (e) {
     console.log(e)
-    return res.status(500).json({ message: 'Server error' })
+    return res.status(500).json({ message: 'Server error.' })
   }
 }
 
@@ -22,7 +22,7 @@ exports.todo_get = async (req, res) => {
     return res.status(200).json(todos)
   } catch (e) {
     console.log(e)
-    return res.status(500).json({ message: 'Server error' })
+    return res.status(500).json({ message: 'Server error.' })
   }
 }
 
@@ -35,7 +35,7 @@ exports.todo_update = async (req, res) => {
     return res.status(200).json({ todo })
   } catch (e) {
     console.log(e)
-    return res.status(500).json({ message: 'Server error' })
+    return res.status(500).json({ message: 'Server error.' })
   }
 }
 
@@ -45,7 +45,7 @@ exports.todo_delete = async (req, res) => {
     return res.status(200).json({})
   } catch (e) {
     console.log(e)
-    return res.status(500).json({ message: 'Server error' })
+    return res.status(500).json({ message: 'Server error.' })
   }
 }
 
@@ -55,6 +55,6 @@ exports.todo_deleteComleted = async (req, res) => {
     return res.status(200).json({})
   } catch (e) {
     console.log(e)
-    return res.status(500).json({ message: 'Server error' })
+    return res.status(500).json({ message: 'Server error.' })
   }
 }

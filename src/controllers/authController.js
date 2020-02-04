@@ -5,7 +5,7 @@ const config = require('../config')
 
 exports.auth_register = async (req, res) => {
   try {
-    const message = 'Такой пользователь уже существует'
+    const message = 'Такой пользователь уже существует.'
     const { email, password } = req.body
     const candidate = await User.findOne({ email })
     if (candidate) {
@@ -21,13 +21,13 @@ exports.auth_register = async (req, res) => {
     return res.status(201).json({ user })
   } catch (e) {
     console.log(e)
-    return res.status(500).json({ message: 'Server error' })
+    return res.status(500).json({ message: 'Server error.' })
   }
 }
 
 exports.auth_login = async (req, res) => {
   const message =
-    'Пользователь с такой электронной почтой или паролем не найден'
+    'Пользователь с такой электронной почтой или паролем не найден.'
   try {
     const { email, password } = req.body
     const candidate = await User.findOne({ email })
@@ -52,7 +52,7 @@ exports.auth_login = async (req, res) => {
       .json({ newAccessToken, newRefreshToken, expDate, uid: candidate._id })
   } catch (e) {
     console.log(e)
-    return res.status(500).json({ message: 'Server error' })
+    return res.status(500).json({ message: 'Server error.' })
   }
 }
 
@@ -63,7 +63,7 @@ exports.auth_token = async (req, res) => {
     const candidate = await User.findOne({ _id: decoded.userId })
 
     if (candidate.refreshToken !== refreshToken) {
-      return res.status(400).json({ message: 'Invalid token!' })
+      return res.status(400).json({ message: 'Invalid token.' })
     }
 
     const { newAccessToken, newRefreshToken, expDate } = getNewTokens(
@@ -76,19 +76,19 @@ exports.auth_token = async (req, res) => {
     return res.status(200).json({ newAccessToken, newRefreshToken, expDate })
   } catch (e) {
     if (e instanceof jwt.TokenExpiredError) {
-      return res.status(400).json({ message: 'Token expired!' })
+      return res.status(400).json({ message: 'Token expired.' })
     } else if (e instanceof jwt.JsonWebTokenError) {
-      return res.status(400).json({ message: 'Invalid token!' })
+      return res.status(400).json({ message: 'Invalid signature.' })
     } else {
       console.log(e)
-      return res.status(500).json({ message: 'Server error' })
+      return res.status(500).json({ message: 'Server error.' })
     }
   }
 }
 
 function getNewTokens(userId) {
   const newAccessToken = jwt.sign({ userId }, config.JWT_SECRET, {
-    expiresIn: '5s',
+    expiresIn: '30m',
   })
   const newRefreshToken = jwt.sign({ userId }, config.REFRESH_SECRET, {
     expiresIn: '60d',
